@@ -10,3 +10,5 @@ def First_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
             return (True, cur.allocate_mem(p.need_mem))
         cur = cur.next
     return (False, None) # type: ignore
+
+# todo 其他算法

@@ -20,13 +20,12 @@ def CPU(head:Memory, requirements:typing.List[process],
             pass
         # 使占用中的进程需求时间-1
         for i, _ in enumerate(occupation_heap):
-            occupation_heap[i][0].require_time -= 1
+            occupation_heap[i][0].require_time -= 1 # type: ignore
         # 释放到时间的进程
         try:
             while(heapq.nsmallest(1, occupation_heap)[0][0].require_time == 0):
                 temp = heapq.nsmallest(1, occupation_heap)[0][0]
                 print(temp.num, temp.need_mem, temp.arrive_time, temp.require_time, 'deleted, time =', time)
-                # todo 图形化界面修改
                 heapq.heappop(occupation_heap)[1].free_mem()
         except IndexError:
             pass
