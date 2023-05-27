@@ -1,16 +1,21 @@
 import tkinter as tk
-from bridge import allocate_memory, free_memory, main
+from bridge import bridge
 
 RATIO = 2
 selected_rectangle = None
 name_list = []
 id_list = []
+prev_algorithm = None
 
 def allocate_rectangle():
-
+    global prev_algorithm
     global name_list
     # 获取用户输入的矩形尺寸和名称
-    size = int(size_entry.get())
+    try:
+        size = int(size_entry.get())
+    except ValueError:
+        Prompt_label.config(text='Input integer to represent memory.')
+        return
     name = name_entry.get()
 
     if not name.isalpha():
@@ -18,16 +23,21 @@ def allocate_rectangle():
         return
     
     if name in name_list:
-        Prompt_label.config(text='Name already exists, please use other name and again.')
+        Prompt_label.config(text='Name already exists, please use other name and try again.')
         return
 
     # 获取选中的算法
     algorithm = algorithm_var.get()
+    if algorithm != prev_algorithm:
+        change_algorithm()
+        clear_all()
+        prev_algorithm = algorithm
     
-    flag, begin = allocate_memory(size, name, algorithm)
+    
+    flag, begin = Bridge.allocate_memory(size, name, algorithm)
 
     if not flag:
-        Prompt_label.config(text='Allocating failed, please try again.')
+        Prompt_label.config(text='Memory overflow, please change size and try again.')
         return
     
     name_list.append(name)
@@ -52,6 +62,11 @@ def allocate_rectangle():
     canvas.itemconfig(label_id, tag=(name, rectangle_id))
     
     Prompt_label.config(text='')
+
+def change_algorithm():
+    Prompt_label.config(text='New algorithm detected, clear all automatically.')
+    print('changed')
+    return
 
 def select_rectangle(rectangle_id):
     global selected_rectangle
@@ -83,14 +98,16 @@ def free_rectangle(mode=None):
     if selected_rectangle:
         # 删除选中的矩形和关联的标签
         related_items = canvas.itemcget(selected_rectangle, "tag").split()
-        free_memory(related_items[0])
         
         if mode == None:
+            if id_list[-1] == selected_rectangle:
+                Bridge.cur_pointer = Bridge.cur_pointer.prev # type: ignore
             id_list.remove(selected_rectangle)
             name_list.remove(related_items[0])
         
         for item in related_items:
             canvas.delete(item)
+        Bridge.free_memory(related_items[0])
         
         selected_rectangle = None
         
@@ -193,5 +210,6 @@ def initialization():
 
 
 if __name__ == '__main__':
-    main()
+    Bridge = bridge()
+    Bridge.main()
     initialization()

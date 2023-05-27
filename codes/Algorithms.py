@@ -12,3 +12,12 @@ def First_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
     return (False, None) # type: ignore
 
 # todo 其他算法
+
+def Next_fit(cur_pointer:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
+    cur = cur_pointer
+    assert isinstance(cur, Memory)
+    while(cur != None):
+        if cur.is_free and cur.size >= p.need_mem:
+            return (True, cur.allocate_mem(p.need_mem))
+        cur = cur.next
+    return (False, None) # type: ignore
