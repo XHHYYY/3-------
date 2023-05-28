@@ -8,13 +8,16 @@ class Memory():
         self.prev       = prev
         
     def allocate_mem(self, size):
+        # 输入检查
         if size > self.size:
             raise Exception('Memory Overflow')
+        
+        
         elif size == self.size:
             self.is_free = False
             return self
         
-        
+        # 申请新节点
         new_mem = Memory(self.mem_num, False, self.begin, size, self, self.prev)
         if self.prev != None:
             self.prev.next = new_mem
@@ -22,15 +25,19 @@ class Memory():
         self.prev = new_mem
         self.begin = self.begin + size
         self.size  = self.size - size
+        # 更新后续节点的序号
         self.update_num(is_allocate=True)
         
         return new_mem
         
     def free_mem(self):
+        # 输入检查
         if self.is_free:
             raise Exception('Memory already free')
         if self.prev == None:
             raise Exception('Free head Error')
+        
+        # 左右皆空
         if self.prev != None and self.next != None and self.prev.is_free and self.next.is_free:
             if self.next.next != None:
                 self.next.next.update_num(is_allocate=False)
@@ -42,6 +49,7 @@ class Memory():
             temp = self.prev
             del self
             return temp
+        # 左空
         elif self.prev.is_free:
             self.prev.size = self.prev.size + self.size
             self.prev.next = self.next
@@ -52,6 +60,7 @@ class Memory():
             del self
             temp.is_free = True
             return temp
+        # 右空
         elif self.next != None and self.next.is_free:
             self.next.update_num(is_allocate=False)
             self.size = self.size + self.next.size
@@ -62,11 +71,12 @@ class Memory():
             del temp
             self.is_free = True
             return self
+        # 左右皆满（或无）
         else:
             self.is_free = True
             return self
-
         
+    # 更新序号
     def update_num(self, is_allocate:bool):
         if self.next != None:
             self.next.update_num(is_allocate)
@@ -81,6 +91,7 @@ class process():
         self.arrive_time    = arrive_time
         self.require_time   = require_time
         
+    # 用于堆排序
     def __lt__(self, other):
         assert isinstance(other, process)
         return self.require_time < other.require_time # type:ignore

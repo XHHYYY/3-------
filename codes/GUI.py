@@ -129,8 +129,6 @@ def clear_all():
     selected_rectangle = None
     Bridge.cur_pointer = Bridge.head
 
-
-
 def initialization():
     
     global size_entry

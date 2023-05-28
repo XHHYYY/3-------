@@ -56,7 +56,216 @@ Windows操作系统，使用Python实现。
 
 #### 1. 空闲链表
 
+在`Classes.py`中实现。
 
+##### 链表节点类`Memory`：
+
+```Python
+class Memory():
+    def __init__(self, num=0, is_free=True, begin=0, size=1024, next=None, prev=None) -> None:
+        self.mem_num    = num
+        self.is_free    = is_free
+        self.begin      = begin
+        self.size       = size
+        self.next       = next
+        self.prev       = prev
+        
+    def allocate_mem(self, size):
+        
+    def free_mem(self):
+       
+    # 更新序号
+    def update_num(self, is_allocate:bool):
+```
+
+
+
+申请内存函数：
+
+当前节点为空闲节点`self`，先申请一个新节点并初始化，更新本节点的起始位置和大小、序号后，调整前后节点指针，最后返回新节点。
+
+```Python
+    def allocate_mem(self, size):
+	    ...
+	    ...
+	    
+		# 申请新节点
+        new_mem = Memory(self.mem_num, False, self.begin, size, self, self.prev)
+        if self.prev != None:
+            self.prev.next = new_mem
+        
+        self.prev = new_mem
+        self.begin = self.begin + size
+        self.size  = self.size - size
+        
+        ...
+        ...
+```
+
+
+
+释放内存函数：
+
+由于释放后原有内存会变为空闲，需要考虑新的空闲内存与前后空闲内存的合并，因此考虑四种情况：前后皆空闲、仅前空闲、仅后空闲和前后皆不空闲，合并后保证没有连续的空闲节点。最终无论哪种情况都会返回空闲节点。
+
+```Python
+	def free_mem(self):
+		# 左右皆空
+        if self.prev != None and self.next != None and self.prev.is_free and self.next.is_free:
+            if self.next.next != None:
+                self.next.next.update_num(is_allocate=False)
+                self.next.next.update_num(is_allocate=False)
+                self.next.next.prev = self.prev
+            self.prev.next = self.next.next
+            self.prev.size = self.prev.size + self.size + self.next.size
+            del self.next
+            temp = self.prev
+            del self
+            return temp
+        # 左空
+        elif self.prev.is_free:
+            self.prev.size = self.prev.size + self.size
+            self.prev.next = self.next
+            if self.next != None:
+                self.next.prev = self.prev
+                self.next.update_num(is_allocate=False)
+            temp = self.prev
+            del self
+            temp.is_free = True
+            return temp
+        # 右空
+        elif self.next != None and self.next.is_free:
+            self.next.update_num(is_allocate=False)
+            self.size = self.size + self.next.size
+            if self.next.next != None:
+                self.next.next.prev = self
+            temp = self.next
+            self.next = self.next.next
+            del temp
+            self.is_free = True
+            return self
+        # 左右皆满（或无）
+        else:
+            self.is_free = True
+            return self
+```
+
+
+
+##### 进程类`process`：
+
+```Python
+class process():
+    def __init__(self, need, num=None, arrive_time=None, require_time=None):
+        self.num            = num
+        self.need_mem       = need
+        self.arrive_time    = arrive_time
+        self.require_time   = require_time
+        
+    # 用于堆排序
+    def __lt__(self, other):
+        assert isinstance(other, process)
+        return self.require_time < other.require_time # type:ignore
+```
+
+#### 2. 分配算法
+
+在`Algorithms.py`中实现
+
+##### 首次适配
+
+逐一查找是否可分配。
+
+```Python
+def First_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
+    cur = head
+    assert isinstance(cur, Memory)
+    while(cur != None):
+        if cur.is_free and cur.size >= p.need_mem:
+            return (True, cur.allocate_mem(p.need_mem))
+        cur = cur.next
+    return (False, None) # type: ignore
+```
+
+##### 下次分配
+
+与首次分配的区别在于传入指针为当前指针而非头指针；需要额外返回当前指针。
+
+```Python
+def Next_fit(cur_pointer:Memory, p:process) -> typing.Tuple[bool, Memory or None, Memory]:
+    cur_pointer = cur_pointer.next # type: ignore
+    assert isinstance(cur_pointer, Memory)
+    while(cur_pointer != None):
+        if cur_pointer.is_free and cur_pointer.size >= p.need_mem:
+            return (True, cur_pointer.allocate_mem(p.need_mem), cur_pointer.prev)# type: ignore
+        cur_pointer = cur_pointer.next # type: ignore
+    return (False, None, None) # type: ignore
+```
+
+##### 最佳分配
+
+遍历所有节点找到最佳适配并返回
+
+```Python
+def Best_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
+    cur = head
+    best_pair = (None, 99999)
+    assert isinstance(cur, Memory)
+    while(cur != None):
+        if cur.is_free and cur.size >= p.need_mem:
+            if cur.size - p.need_mem < best_pair[1]:
+                best_pair = (cur.prev.next, cur.size - p.need_mem) # type: ignore
+        cur = cur.next
+    return (True, best_pair[0].allocate_mem(p.need_mem)) if best_pair[0] != None else (False, None) # type: ignore 
+```
+
+##### 最差分配
+
+区别在于找最坏而非最好
+
+```Python
+def Worst_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
+    cur = head
+    worst_pair = (None, -1)
+    assert isinstance(cur, Memory)
+    while(cur != None):
+        if cur.is_free and cur.size >= p.need_mem:
+            if cur.size - p.need_mem > worst_pair[1]:
+                worst_pair = (cur.prev.next, cur.size - p.need_mem) # type: ignore
+        cur = cur.next
+    return (True, worst_pair[0].allocate_mem(p.need_mem)) if worst_pair[0] != None else (False, None) # type: ignore 
+```
+
+#### 3. GUI
+
+主要难度在于输入检查，这里使用了`RATIO`以表示矩形框放缩大小。
+
+```Python
+import tkinter as tk
+from bridge import bridge
+
+RATIO = 1
+selected_rectangle = None
+name_list = []
+id_list = []
+prev_algorithm = None
+
+
+def allocate_rectangle():
+
+def select_rectangle(rectangle_id):
+
+def free_rectangle(mode=None):
+
+def clear_all(): 
+
+def initialization(): 
+
+if __name__ == '__main__':
+    Bridge = bridge()
+    Bridge.main()
+    initialization()
+```
 
 ### 3. 结果验证
 
