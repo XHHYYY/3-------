@@ -14,6 +14,7 @@ class Memory():
             self.is_free = False
             return self
         
+        
         new_mem = Memory(self.mem_num, False, self.begin, size, self, self.prev)
         if self.prev != None:
             self.prev.next = new_mem
@@ -63,6 +64,7 @@ class Memory():
             return self
         else:
             self.is_free = True
+            return self
 
         
     def update_num(self, is_allocate:bool):
@@ -82,3 +84,12 @@ class process():
     def __lt__(self, other):
         assert isinstance(other, process)
         return self.require_time < other.require_time # type:ignore
+    
+    
+    
+def linked_list_init() -> Memory:
+    init = Memory()
+    head = Memory(-1, False, -1, 0, init)
+    init.prev = head
+    del init
+    return head

@@ -1,6 +1,7 @@
 import heapq
 import typing
-from Classes import Memory, process
+from Classes import Memory, process, linked_list_init
+from Algorithms import *
 
 
 def CPU(head:Memory, requirements:typing.List[process], 
@@ -20,12 +21,13 @@ def CPU(head:Memory, requirements:typing.List[process],
             pass
         # 使占用中的进程需求时间-1
         for i, _ in enumerate(occupation_heap):
-            occupation_heap[i][0].require_time -= 1 # type: ignore
+            occupation_heap[i][0].require_time -= 1 #type:ignore
         # 释放到时间的进程
         try:
             while(heapq.nsmallest(1, occupation_heap)[0][0].require_time == 0):
                 temp = heapq.nsmallest(1, occupation_heap)[0][0]
                 print(temp.num, temp.need_mem, temp.arrive_time, temp.require_time, 'deleted, time =', time)
+                # todo 图形化界面修改
                 heapq.heappop(occupation_heap)[1].free_mem()
         except IndexError:
             pass
@@ -46,3 +48,22 @@ def CPU(head:Memory, requirements:typing.List[process],
         except IndexError:
             pass
         
+
+def read_sequence() -> list:
+    with open('./codes/sequence.txt', 'r') as f:
+        txt = f.read()
+    requirement_list:list[process] = []
+    list_sequence = txt.split('\n')
+    for requirement in list_sequence:
+        if requirement == '':
+            break
+        temp = list(map(int, requirement.split()))
+        p = process(*temp)
+        requirement_list.append(p)
+    return requirement_list
+
+
+if __name__ == '__main__':
+    head = linked_list_init()
+    requirements = read_sequence()
+    CPU(head, requirements, First_fit)
