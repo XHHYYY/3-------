@@ -33,7 +33,7 @@ class bridge():
                 return flag, Mem.begin
             else:
                 return flag, None # type: ignore
-        elif algorithm == 'Best-fit':
+        elif algorithm == 'Worst-fit':
             flag, Mem = Worst_fit(head, process(need = size))
             if flag:
                 Mem_dict[name] = Mem

@@ -1,11 +1,12 @@
 import tkinter as tk
 from bridge import bridge
 
-RATIO = 2
+RATIO = 1
 selected_rectangle = None
 name_list = []
 id_list = []
 prev_algorithm = None
+
 
 def allocate_rectangle():
     global prev_algorithm
@@ -16,6 +17,11 @@ def allocate_rectangle():
     except ValueError:
         Prompt_label.config(text='Input integer to represent memory.')
         return
+    
+    if size <= 0:
+        Prompt_label.config(text='Input POSITIVE integer to represent memory.')
+        return
+    
     name = name_entry.get()
 
     if not name.isalpha():
@@ -27,9 +33,9 @@ def allocate_rectangle():
         return
 
     # 获取选中的算法
+    global algorithm
     algorithm = algorithm_var.get()
     if algorithm != prev_algorithm:
-        change_algorithm()
         clear_all()
         prev_algorithm = algorithm
     
@@ -43,7 +49,7 @@ def allocate_rectangle():
     name_list.append(name)
     
     # 计算新矩形的坐标
-    coords = [0, begin / RATIO, Width,  + int((begin + size) / RATIO)] # type: ignore
+    coords = [begin / RATIO, 0, int((begin + size) / RATIO), Height] # type: ignore
     x1 = coords[0]
     y1 = coords[1]
     x2 = coords[2]
@@ -52,7 +58,7 @@ def allocate_rectangle():
     # 在画布中绘制新矩形，并添加标签显示名称和尺寸
     rectangle_id = canvas.create_rectangle(x1, y1, x2, y2, fill="light blue", tags=name)
     id_list.append(rectangle_id)
-    label_id = canvas.create_text((x1 + x2) // 2, (y1 + y2) // 2, text=f"Name: {name}\nSize: {size}", tags=name) # todo rect和label同名，可能有bug
+    label_id = canvas.create_text((x1 + x2) // 2, (y1 + y2) // 2, text=f"Name: {name}\nSize: {size} KB", tags=name) # todo rect和label同名，可能有bug
 
     # 绑定矩形的点击事件
     canvas.tag_bind(rectangle_id, "<Button-1>", lambda event: select_rectangle(rectangle_id))
@@ -63,10 +69,6 @@ def allocate_rectangle():
     
     Prompt_label.config(text='')
 
-def change_algorithm():
-    Prompt_label.config(text='New algorithm detected, clear all automatically.')
-    print('changed')
-    return
 
 def select_rectangle(rectangle_id):
     global selected_rectangle
@@ -100,7 +102,8 @@ def free_rectangle(mode=None):
         related_items = canvas.itemcget(selected_rectangle, "tag").split()
         
         if mode == None:
-            if id_list[-1] == selected_rectangle:
+            global algorithm
+            if algorithm == 'Next-fir' and id_list[-1] == selected_rectangle:
                 Bridge.cur_pointer = Bridge.cur_pointer.prev # type: ignore
             id_list.remove(selected_rectangle)
             name_list.remove(related_items[0])
@@ -120,7 +123,7 @@ def clear_all():
     
     for id in id_list:
         selected_rectangle = id
-        free_rectangle(mode='test')
+        free_rectangle(mode='clear all')
     id_list = []
     name_list = []
     selected_rectangle = None
@@ -148,19 +151,37 @@ def initialization():
     global algorithm_var
     global canvas
     global Prompt_label
-    global Width
+    global Height
     global prev_rectangle
     prev_rectangle = None
     
-    Width = 100
+    Height = 100
     
     # 创建主窗口
     root = tk.Tk()
-    root.geometry("700x900")  # 设置窗口大小为700x900
+    root.geometry("1200x700")  # 设置窗口大小为700x900
 
     # 创建矩形框
-    canvas = tk.Canvas(root, width=Width, height=512, bg="white", highlightthickness=1, highlightbackground="black")
+    canvas = tk.Canvas(root, width=int(1024/RATIO), height=Height, bg="white", highlightthickness=1, highlightbackground="black")
     canvas.pack()
+
+    size_label = tk.Label(root, text="1024 KB")
+    size_label.pack()
+    
+    white_label = tk.Label(root, text="")
+    white_label.pack()
+    
+    attention_label = tk.Label(root, text="ATTENTION: if an area of memory is too small it will be hard to be seen.")
+    attention_label.pack()
+    
+    attention_label = tk.Label(root, text="Then you might need to press \"Clear all\".      e.g., Size = 1 KB")
+    attention_label.pack()
+    
+    white_label = tk.Label(root, text="")
+    white_label.pack()
+
+    Chang_label = tk.Label(root, text="Changing algorithm will reset memory")
+    Chang_label.pack()
 
     # 创建选择算法的框架和标签
     algorithm_frame = tk.Frame(root)

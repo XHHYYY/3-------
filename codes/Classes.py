@@ -6,9 +6,6 @@ class Memory():
         self.size       = size
         self.next       = next
         self.prev       = prev
-
-    def __del__(self):
-        print('del active, num = {}'.format(self.mem_num))
         
     def allocate_mem(self, size):
         if size > self.size:
@@ -16,7 +13,6 @@ class Memory():
         elif size == self.size:
             self.is_free = False
             return self
-        
         
         new_mem = Memory(self.mem_num, False, self.begin, size, self, self.prev)
         if self.prev != None:

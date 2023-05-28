@@ -22,7 +22,7 @@ def Next_fit(cur_pointer:Memory, p:process) -> typing.Tuple[bool, Memory or None
 
 def Best_fit(head:Memory, p:process) -> typing.Tuple[bool, Memory or None]:
     cur = head
-    best_pair = (None, 9999)
+    best_pair = (None, 99999)
     assert isinstance(cur, Memory)
     while(cur != None):
         if cur.is_free and cur.size >= p.need_mem:
