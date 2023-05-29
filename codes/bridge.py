@@ -11,7 +11,7 @@ class bridge():
         if algorithm == 'First-fit':
             flag, Mem = First_fit(head, process(need = size))
             if flag:
-                Mem_dict[name] = Mem
+                self.Mem_dict[name] = Mem
                 return flag, Mem.begin
             else:
                 return flag, None # type: ignore
@@ -20,23 +20,25 @@ class bridge():
                 self.cur_pointer = head
             flag, Mem, self.cur_pointer = Next_fit(self.cur_pointer, process(need = size)) # type: ignore
             if flag:
-                Mem_dict[name] = Mem
+                self.Mem_dict[name] = Mem
                 return flag, Mem.begin
             else:
                 self.cur_pointer = head
                 flag, Mem, self.cur_pointer = Next_fit(self.cur_pointer, process(need = size)) # type: ignore
+                if flag:
+                    self.Mem_dict[name] = Mem
                 return (flag, None) if not flag else (flag, Mem.begin) # type: ignore
         elif algorithm == 'Best-fit':
             flag, Mem = Best_fit(head, process(need = size))
             if flag:
-                Mem_dict[name] = Mem
+                self.Mem_dict[name] = Mem
                 return flag, Mem.begin
             else:
                 return flag, None # type: ignore
         elif algorithm == 'Worst-fit':
             flag, Mem = Worst_fit(head, process(need = size))
             if flag:
-                Mem_dict[name] = Mem
+                self.Mem_dict[name] = Mem
                 return flag, Mem.begin
             else:
                 return flag, None # type: ignore
@@ -44,14 +46,13 @@ class bridge():
 
 
     def free_memory(self, name:str) -> None:
-        Mem_dict[name].free_mem()
-        del Mem_dict[name]
+        self.Mem_dict[name].free_mem()
+        del self.Mem_dict[name]
 
     def main(self):
         global head
-        global Mem_dict
         
         head = linked_list_init()
         self.head = head
 
-        Mem_dict = {}
+        self.Mem_dict = {}

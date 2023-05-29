@@ -2,7 +2,7 @@ import heapq
 import typing
 from Classes import Memory, process, linked_list_init
 from Algorithms import *
-
+from generate_sequence import generate
 
 def CPU(head:Memory, requirements:typing.List[process], 
         algorithm:typing.Callable[[Memory, process], typing.Tuple[bool, Memory]]):
@@ -50,8 +50,13 @@ def CPU(head:Memory, requirements:typing.List[process],
         
 
 def read_sequence() -> list:
-    with open('./codes/sequence.txt', 'r') as f:
-        txt = f.read()
+    try:
+        with open('./codes/sequence.txt', 'r') as f:
+            txt = f.read()
+    except FileNotFoundError:
+        generate()
+        with open('./codes/sequence.txt', 'r') as f:
+            txt = f.read()
     requirement_list:list[process] = []
     list_sequence = txt.split('\n')
     for requirement in list_sequence:

@@ -1,6 +1,8 @@
-# <center> 存储管理问题
+# <center> 实验三	存储管理问题
 
-[toc]
+<center> <i>薛皓阳 2020010647 xuehy20@mails.tsinghua.edu.cn </i> 
+
+
 
 ## <center>动态分区存储管理
 
@@ -269,13 +271,119 @@ if __name__ == '__main__':
 
 ### 3. 结果验证
 
+#### UI界面
+
+<img src="images/UI.png" style="zoom:60%;" />
+
+#### 首次匹配：
+
+操作序列：
+
+申请128K的A；申请256K的AB；释放A；申请256K的ABC（此时可以看到自动选择了后面的空闲分区）；申请128K的ABCD。
+
+![](images/FF-1.png)
+
+![FF-2](images/FF-2.png)
+
+![FF-3](images/FF-3.png)
+
+![FF-4](images/FF-4.png)
+
+![FF-5](images/FF-5.png)
+
+可以看到符合要求。
+
+#### 下次匹配
+
+操作序列：
+
+以下均申请大小为128KB的内存。
+
+申请内存A、AB、…、ABCDEFGH；
+
+释放奇数号内存块；
+
+申请Z、ZX；释放Z；
+
+申请ZXC（此时可以看到并没有从第一个开始分配内存，而是从下一个空闲分区开始）
+
+释放ZXC（指针指向前一个）；申请ZXCV（此时在ZXC被释放的内存处申请，符合逻辑）
+
+![](images/NF-1.png)
+
+![NF-2](images/NF-2.png)
+
+![NF-3](images/NF-3.png)
+
+![NF-4](images/NF-4.png)
+
+![NF-5](images/NF-5.png)
+
+![NF-6](images/NF-6.png)
+
+![NF-7](images/NF-7.png)
+
+![NF-8](images/NF-8.png)
+
+![NF-9](images/NF-9.png)
+
+#### 最佳适配
+
+首先通过合适的申请和释放产生如第一张图的分配结构，其中三个空闲分区分别为128K、256K、64K；
+
+申请多个64K大小的内存块，可以看到优先填充小的空闲分区，大的空闲分区得以保留。
+
+![](images/BF-1.png)
+
+![BF-2](images/BF-2.png)
+
+![BF-3](images/BF-3.png)
+
+![BF-4](images/BF-4.png)
+
+![BF-5](images/BF-5.png)
+
+#### 最差匹配
+
+操作序列：
+
+首先产生如第一张图的结构，空闲分区大小分别为128K、256K、192K。然后不断申请大小为64K的内存。可以看到优先分配较大的空闲分区。
+
+![](images/WF-1.png)
+
+![WF-2](images/WF-2.png)
+
+![WF-3](images/WF-3.png)
+
+![WF-4](images/WF-4.png)
+
+![WF-5](images/WF-5.png)
+
+![WF-6](images/WF-6.png)
+
+![WF-7](images/WF-7.png)
+
+![WF-8](images/WF-8.png)
+
+![WF-9](images/WF-9.png)
+
+![WF-91](images/WF-91.png)
+
 ### 4. 额外内容
+
+额外实现了`CPU.py`，可以针对输入申请队列自动模拟内存的分配。输入队列的每一个申请单元包含：申请大小、进程序号、到达时间、占用时间。使用`generate_sequence.py`可以自动生成随机队列。运行`CPU.py`即可看到进程的申请、释放情况。由于时间限制，此内容未做GUI适配。
+
+结果：
+
+![image-20230528174836876](images/image-20230528174836876.png)
+
+每行内容为：
+
+进程号，申请大小，到达时间，剩余占用时间、申请或释放、当前时间
 
 ## 五、思考题
 
 ​		基于位图和空闲链表的存储管理各有什么优劣？如果使用基于位图的存储管理，有何额 外注意事项？
-
-答：
 
 ##### 位图：
 
@@ -298,7 +406,7 @@ if __name__ == '__main__':
 2. 链表包含了进程信息，因此释放进程时可以直接从表头开始查找到相应进程并释放，无需额外维护进程列表。
 3. 占用的内存空间可以动态调整。
 
-空闲链表的存储管理的缺点：
+缺点：
 
 1. 修改内存分配情况速度较慢，涉及多个节点之间指针的修改，同时需要新申请或释放内存以产生或删除节点；
 2. 查找速度慢，需要遍历整个链表；
@@ -320,7 +428,7 @@ pack
 │     Algorithms.py                     # 实现四种分配算法
 │     bridge.py                         # 作为链表系统和GUI系统的中间调度系统
 │     Classes.py                        # 实现了内存块Memory类和进程process类
-│     CPU.py                            # 实现了内存块具体的调度算法，配合输入队列sequence.txt使用
+│     CPU.py                            # 实现了内存块具体的调度算法
 │     generate_sequence.py              # 生成模拟时序上的内存申请队列
 │     GUI.py                            # GUI界面，直接运行即可验证实验任务
 │          

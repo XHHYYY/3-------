@@ -103,7 +103,7 @@ def free_rectangle(mode=None):
         
         if mode == None:
             global algorithm
-            if algorithm == 'Next-fir' and id_list[-1] == selected_rectangle:
+            if algorithm == 'Next-fit' and id_list[-1] == selected_rectangle:
                 Bridge.cur_pointer = Bridge.cur_pointer.prev # type: ignore
             id_list.remove(selected_rectangle)
             name_list.remove(related_items[0])
@@ -144,7 +144,7 @@ def initialization():
     
     # 创建主窗口
     root = tk.Tk()
-    root.geometry("1200x700")  # 设置窗口大小为700x900
+    root.geometry("1200x500")  # 设置窗口大小为700x900
 
     # 创建矩形框
     canvas = tk.Canvas(root, width=int(1024/RATIO), height=Height, bg="white", highlightthickness=1, highlightbackground="black")
